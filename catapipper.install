@@ -1,0 +1,490 @@
+<?php
+function catapipper_install() {
+	// Set default for site name field
+	variable_set('site_name', $SERVER['SERVER_NAME']);
+
+  // Add test formats
+  // ----------------
+  
+  // Filtered HTML Format
+  $filtered_html_format = array(
+    'format' => 'filtered_html',
+    'name' => 'Filtered HTML',
+    'weight' => 1,
+    'filters' => array(
+      // URL filter.
+      'filter_url' => array(
+        'weight' => 0,
+        'status' => 1,
+      ),
+      // Disable Lightbox iFrame
+      'lightbox_disable_iframe_filter' => array(
+        'status' => 1
+      ),
+      // HTML filter.
+      'filter_html' => array(
+        'weight' => 1,
+        'status' => 1,
+        'settings' => array(
+          'allowed_html' => '<blockquote> <cite> <code> <dd> <dl> <dt> <em> <li> <ol> <p> <strong> <ul>'
+        ),
+      ),
+      // Line break filter.
+      'filter_autop' => array(
+        'weight' => 2,
+        'status' => 1,
+      ),
+      // HTML corrector filter.
+      'filter_htmlcorrector' => array(
+        'weight' => 10,
+        'status' => 1,
+      ),
+    ),
+  );
+  $filtered_html_format = (object) $filtered_html_format;
+  filter_format_save($filtered_html_format);
+
+  $full_html_format = array(
+    'format' => 'full_html',
+    'name' => 'Full HTML',
+    'weight' => 0,
+    'filters' => array(
+      // URL filter.
+      'filter_url' => array(
+        'weight' => 0,
+        'status' => 1,
+      ),
+      // Disable Lightbox iFrame
+      'lightbox_disable_iframe_filter' => array(
+        'status' => 1
+      ),
+      // Line break filter.
+      'filter_autop' => array(
+        'weight' => 1,
+        'status' => 1,
+      ),
+      // HTML corrector filter.
+      'filter_htmlcorrector' => array(
+        'weight' => 10,
+        'status' => 1,
+      ),
+    ),
+  );
+  $full_html_format = (object) $full_html_format;
+  filter_format_save($full_html_format);
+
+  // Set custom content types
+  // ------------------------
+  
+  $types = array(
+    array(
+      'type' => 'park',
+      'name' => st('Park'),
+      'base' => 'node_content',
+      'description' => st('Individual Park pages that provide all the information about said park.'),
+      'custom' => TRUE,
+      'modified' => TRUE,
+      'locked' => FALSE
+    )
+  );
+
+  foreach ($types as $type){
+    $type = node_type_set_defaults($type);
+    node_type_save($type);
+  }
+
+  // Default page to not be promoted and have comments disabled
+  variable_set('node_options_page', array('status'));
+  variable_set('comment_page', COMMENT_NODE_DISABLED);
+  variable_set('node_submitted_page', FALSE);
+
+  // Role permissions
+  // ----------------
+
+  $filtered_html_permission = filter_permission_name($filtered_html_format);
+
+  // Anonymous User role
+  user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array(
+    'access content',
+    'access comments',
+    'search content',
+    'show format tips',
+    'show more format tips link',
+    $filtered_html_permission));
+
+  // Authenticated User role
+  user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array(
+    'access content',
+    'access comments',
+    'access site-wide contact form',
+    'post comments',
+    'skip comment approval',
+    'search content',
+    'show format tips',
+    'show more format tips link',
+    $filtered_html_permission));
+
+  // Create Site Administrator, with all permissions assigned
+  $admin_role = new stdClass();
+  $admin_role->name = 'administrator';
+  $admin_role->weight = 2;
+  user_role_save($admin_role);
+  user_role_grant_permissions($admin_role->rid, array_keys(
+    module_invoke_all('permission')));
+  
+  // Set this as the administrator role.
+  variable_set('user_admin_role', $admin_role->rid);
+
+  // Assign user 1 the "administrator" role.
+  db_query("INSERT INTO {users_roles} (uid, rid) VALUES (1, " . $admin_role->rid . ")");
+
+  // Create Site Manager, with correct permissions
+  $site_manager_role = new stdClass();
+  $site_manager_role->name = 'site manager';
+  $site_manager_role->weight = 3;
+  user_role_save($site_manager_role);
+  user_role_grant_permissions($site_manager_role->rid, array(
+    'access administration pages',
+    'access all webform results',
+    'access content overview',
+    'access contextual links',
+    'access dashboard',
+    'access navbar',
+    'access own webform results',
+    'access own webform submissions',
+    'access user profiles',
+    'administer blocks',
+    'administer comments',
+    'administer contact forms',
+    'administer fieldgroups',
+    'administer menu',
+    'administer nodes',
+    'administer taxonomy',
+    'create page content',
+    'create url aliases',
+    'create webform content',
+    'delete all webform submissions',
+    'delete any page content',
+    'delete any webform content',
+    'delete own page content',
+    'delete own webform content',
+    'delete own webform submissions',
+    'delete revisions',
+    'edit all webform submissions',
+    'edit any page content',
+    'edit any webform content',
+    'edit own comments',
+    'edit own page content',
+    'edit own webform content',
+    'edit own webform submissions',
+    'notify of path changes',
+    'revert revisions',
+    'show format selection for comment',
+    'show format selection for node',
+    'show format selection for taxonomy_term',
+    'use advanced search',
+    'use text format filtered_html',
+    'use text format full_html',
+    'view advanced help index',
+    'view advanced help popup',
+    'view advanced help topic',
+    'view date repeats',
+    'view own unpublished content',
+    'view the administration theme',
+    'view revisions'));
+
+  // Update the menu router information
+  // ----------------------------------
+
+  menu_rebuild();
+
+  // CKEditor Setup
+  // --------------
+
+  $result = db_query("SELECT settings FROM {ckeditor_settings} WHERE name = :name", array(':name' => 'Advanced'))->fetchField();
+  $settings = unserialize($result);
+  $settings['toolbar'] = "
+[
+    ['Source','Preview','Print'],
+    ['Cut','Copy','Paste','PasteText','PasteFromWord','-','Undo','Redo'],
+    ['Find','Replace','-','SelectAll','-','SpellChecker','Scayt'],
+    ['Image','Table','HorizontalRule','SpecialChar'],
+    '/',
+    ['Bold','Italic','Strike','Subscript','Superscript','-','RemoveFormat'],
+    ['NumberedList','BulletedList','-','Outdent','Indent','-','Blockquote'],
+    ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-','BidiLtr','BidiRtl'],
+    ['Link','Unlink','Anchor'],
+    '/',
+    ['Format','FontSize'],
+    ['TextColor','BGColor'],
+    ['ShowBlocks']
+]
+    ";
+
+  $settings['css_mode'] = "theme";
+  $settings['css_style'] = "theme";
+  $settings['filebrowser'] = "imce";
+  $settings['loadPlugins']['drupalbreaks'] = array(
+    'name' => 'drupalbreaks',
+    'desc' => "Plugin for inserting Drupal teaser and page breaks.",
+    'path' => "%plugin_dir%drupalbreaks/",
+    'default' => "t",
+    'buttons' => array(
+      'DrupalBreak' => array(
+        'label' => "DrupalBreak",
+        'icon' => "images/drupalbreak.png"
+      )
+    )
+  );
+  $settings['loadPlugins']['imce'] = array(
+    'name' => "imce",
+    'desc' => "Plugin for inserting files from imce without image dialog.",
+    'path' => "%plugin_dir%imce/",
+    'default' => "f",
+    'buttons' => array(
+      'IMCE' => array(
+        'label' => "IMCE",
+        'icon' => "images/icon.png"
+      )
+    )
+  );
+
+  $settings = serialize($settings);
+
+  $update = db_update('ckeditor_settings')
+      ->fields(array(
+        'settings' => $settings,
+      ))
+      ->condition('name', 'Advanced', '=')
+      ->execute();
+  $update = db_update('ckeditor_settings')
+      ->fields(array(
+        'settings' => $settings,
+      ))
+      ->condition('name', 'Full', '=')
+      ->execute();
+
+  // Honeypot
+  // --------
+  variable_set('honeypot_element_name', 'catapipper-crawls-amazing');
+  variable_set('honeypot_time_limit', '5');
+  variable_set('honeypot_form_contact_site_form', '1');
+  variable_set('honeypot_form_user_pass', '1');
+  variable_set('honeypot_form_webforms', '1');
+
+  // XML Sitemap
+  // -----------
+
+  // Page Settings
+  $page_settings = array(
+    'status' => 1,
+    'priority' => '0.5'
+  );
+  variable_set('xmlsitemap_settings_node_page', $page_settings);
+
+  // Webform Settings
+  $webform_settings = array(
+    'status' => 1,
+    'priority' => '0.5'
+  );
+  variable_set('xmlsitemap_settings_node_webform', $webform_settings);
+  variable_set('xmlsitemap_minimum_lifetime', '86400');
+
+  $search_engines = array(
+    'bing',
+    'google'
+  );
+  variable_set('xmlsitemap_engines_engines', $search_engines);
+
+  // Admin Theme Settings
+  // --------------------
+
+  variable_set('theme_ember_settings', array('ember_no_fadein_effect' => 1));
+
+  // Views & Extra Settings
+  // --------------------
+
+  variable_set('views_ui_show_sql_query', 1);
+  variable_set('jquery_update_jquery_version', '1.7');
+  variable_set('pathauto_node_pattern', '[node:title]');
+
+  // Print, email, and PDF versions
+  // ------------------------------
+
+  // Printer friendly
+  variable_set('print_html_new_window', 1);
+  variable_set('print_html_sendtoprinter', 1);
+  variable_set('print_html_windowclose', 1);
+  variable_set('print_html_book_link', '1');
+  variable_set('print_html_link_class', 'print-page');
+  variable_set('print_html_link_pos', array(
+    'corner' => 'corner',
+    'block' => 'block',
+    'help' => 'help',
+    'link' => 0));
+  variable_set('print_html_link_text', 'Printer-friendly version');
+  variable_set('print_html_show_link', '2');
+
+  // Robots
+  variable_set('print_robots_noarchive', 1);
+  variable_set('print_robots_nofollow', 1);
+  variable_set('print_robots_noindex', 1);
+
+  // PDF
+  variable_set('print_pdf_cache_lifetime', '86400');
+  variable_set('print_pdf_content_disposition', '2');
+  variable_set('print_pdf_filename', '[site:name] - [node:title] - [node:changed:custom:Y-m-d]');
+  variable_set('print_pdf_page_orientation', 'portrait');
+  variable_set('print_pdf_paper_size', 'A4');
+  variable_set('print_pdf_pdf_tool', 'print_pdf_mpdf|profiles/catapipper/libraries/mpdf/mpdf.php');
+  variable_set('print_pdf_book_link', '1');
+  variable_set('print_pdf_link_class', 'print-pdf');
+  variable_set('print_pdf_link_pos', array(
+    'corner' => 'corner',
+    'block' => 'block',
+    'help' => 'help',
+    'link' => 0));
+  variable_set('print_pdf_link_text', 'PDF version');
+  variable_set('print_pdf_show_link', '2');
+
+  // Other Settings
+  variable_set('print_html_footer_options', '1');
+  variable_set('print_keep_theme_css', 1);
+  variable_set('print_logo_options', '0');
+  variable_set('print_sourceurl_date', 1);
+  variable_set('print_sourceurl_enabled', 1);
+  variable_set('print_urls', 1);
+
+  // Autologout
+  // ----------
+  variable_set('autologout_inactivity_message', 'You have been logged out due to inactivity.');
+  variable_set('autologout_max_timeout', '172800');
+  variable_set('autologout_message', 'Your session is about to expire. Do you want to reset it?');
+  variable_set('autologout_padding', '10');
+  variable_set('autologout_redirect_url', 'user/login');
+  variable_set('autologout_role_logout', 1);
+  variable_set('autologout_timeout', '1800');
+
+	// imce_profiles and imce_roles_profiles injection
+  // -----------------------------------------------
+
+  $imce_profiles = array(
+    1 => array(
+      'name' => 'User-1',
+      'usertab' => 1,
+      'filesize' => 0,
+      'quota' => 0,
+      'tuquota' => 0,
+      'extensions' => '*',
+      'dimensions' => '1200x1200',
+      'filenum' => 0,
+      'directories' => array(
+        0 => array(
+          'name' => '.',
+          'subnav' => 1,
+          'browse' => 1,
+          'upload' => 1,
+          'thumb' => 1,
+          'delete' => 1,
+          'resize' => 1,
+          ),
+        ),
+      'thumbnails' => array(
+        0 => array(
+          'name' => 'Small',
+          'dimensions' => '90x90',
+          'prefix' => 'small_',
+          'suffix' => NULL,
+          ),
+        1 => array (
+          'name' => 'Medium',
+          'dimensions' => '120x120',
+          'prefix' => 'medium_',
+          'suffix' => NULL,
+          ),
+        2 => array(
+          'name' => 'Large',
+          'dimensions' => '180x180',
+          'prefix' => 'large_',
+          'suffix' => NULL,
+          )
+        )
+      ),
+    2 => array(
+      'name' => 'Sample profile',
+      'usertab' => 1,
+      'filesize' => 1,
+      'quota' => 2,
+      'tuquota' => 0,
+      'extensions' => 'gif png jpg jpeg',
+      'dimensions' => '800x600',
+      'filenum' => 1,
+      'directories' => array(
+        0 => array(
+          'name' => 'u%uid',
+          'subnav' => 0,
+          'browse' => 1,
+          'upload' => 1,
+          'thumb' => 1,
+          'delete' => 0,
+          'resize' => 0,
+          )
+        ),
+      'thumbnails' => array(
+        0 => array(
+          'name' => 'Thumb',
+          'dimensions' => '90x90',
+          'prefix' => 'thumb_',
+          'suffix' => NULL,
+          )
+        )
+      ),
+    3 => array(
+      'name' => 'SUAR',
+      'usertab' => 1,
+      'filesize' => 1,
+      'quota' => 0,
+      'tuquota' => 0,
+      'extensions' => 'gif png jpg jpeg',
+      'dimensions' => '1270x600',
+      'filenum' => 1,
+      'directories' => array(
+        0 => array(
+          'name' => 'images',
+          'subnav' => 0,
+          'browse' => 1,
+          'upload' => 1,
+          'thumb' => 1,
+          'delete' => 1,
+          'resize' => 1,
+          )
+        )
+      ) 
+    );
+    
+    variable_set('imce_profiles', $imce_profiles);
+
+    $imce_roles_profiles = array(
+      3 => array(
+        'weight' => -10,
+        'public_pid' => 3,
+        ),
+      5 => array(
+        'weight' => -9,
+        'public_pid' => 3,
+        ),
+      4 => array(
+        'weight' => -8,
+        'public_pid' => 3,
+        ),
+      2 => array(
+        'weight' => 11,
+        'public_pid' => 0,
+        ),
+      1 => array(
+        'weight' => 12,
+        'public_pid' => 0
+        )
+      );
+    variable_set('imce_roles_profiles', $imce_roles_profiles);
+}

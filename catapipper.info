@@ -1,0 +1,152 @@
+name = Catapipper
+description = Distribution for keeping track of parks and recreation
+core = 7.x
+;theme = catapipper
+
+; Activate Modules
+; ----------------
+
+; Core
+; ----
+dependencies[] = block
+dependencies[] = comment
+dependencies[] = contact
+dependencies[] = contextual
+dependencies[] = dashboard
+dependencies[] = dblog
+dependencies[] = field
+dependencies[] = field_sql_storage
+dependencies[] = field_ui
+dependencies[] = file
+dependencies[] = filter
+dependencies[] = help
+dependencies[] = image
+dependencies[] = list
+dependencies[] = menu
+dependencies[] = node
+dependencies[] = number
+dependencies[] = options
+dependencies[] = path
+dependencies[] = rdf
+dependencies[] = search
+dependencies[] = shortcut
+dependencies[] = system
+dependencies[] = taxonomy
+dependencies[] = text
+;dependencies[] = toolbar
+dependencies[] = update
+dependencies[] = user
+
+; Hydraulic
+;	---------
+
+dependencies[] = autologout
+dependencies[] = advanced_help
+dependencies[] = better_formats
+;dependencies[] = breakpoints
+dependencies[] = ckeditor
+dependencies[] = conditional_fields
+dependencies[] = ctools
+dependencies[] = css_injector
+dependencies[] = diff
+dependencies[] = email
+dependencies[] = entity
+dependencies[] = entity_token
+dependencies[] = entityreference
+dependencies[] = features
+dependencies[] = feeds
+dependencies[] = feeds_ui
+dependencies[] = field_group
+dependencies[] = googleanalytics
+dependencies[] = honeypot
+dependencies[] = imce
+dependencies[] = job_scheduler
+dependencies[] = job_scheduler_trigger
+dependencies[] = jquery_update
+dependencies[] = libraries
+dependencies[] = lightbox2
+dependencies[] = link
+dependencies[] = markdown
+dependencies[] = masquerade
+dependencies[] = menu_block
+dependencies[] = module_filter
+dependencies[] = navbar
+dependencies[] = pathauto
+;dependencies[] = picture
+dependencies[] = rules
+dependencies[] = rules_admin
+dependencies[] = scheduler
+dependencies[] = trigger
+dependencies[] = views
+dependencies[] = views_bootstrap
+dependencies[] = views_data_export
+dependencies[] = views_slideshow
+dependencies[] = views_slideshow_cycle
+dependencies[] = views_ui
+dependencies[] = webform
+dependencies[] = xmlsitemap
+dependencies[] = xmlsitemap_engines
+dependencies[] = xmlsitemap_node
+dependencies[] = xmlsitemap_taxonomy
+
+; Print
+; -----
+
+dependencies[] = print
+dependencies[] = print_pdf
+dependencies[] = print_pdf_mpdf
+dependencies[] = print_ui
+
+; Workflow
+; --------
+
+dependencies[] = workflow_access
+dependencies[] = workflow_actions
+dependencies[] = workflow
+dependencies[] = workflowfield
+dependencies[] = workflow_rules
+dependencies[] = workflownode
+dependencies[] = workflow_admin_ui
+dependencies[] = workflow_views
+
+; Date/Time
+; ---------
+
+dependencies[] = calendar
+dependencies[] = date
+dependencies[] = date_all_day
+dependencies[] = date_popup
+dependencies[] = date_repeat
+dependencies[] = date_repeat_field
+dependencies[] = date_views
+
+; Create Users
+; ------------
+
+users[admin][uid] = 1
+users[admin][name] = catapipper
+users[admin][mail] = catapipper@gmail.com
+users[admin][roles] = authenticated user
+users[admin][status] = 1
+
+users[sitemanager][uid] = 2
+users[sitemanager][name] = sitemanager
+users[sitemanager][mail] = do.no.reply@uncc.edu
+users[sitemanager][roles] = site manager
+users[sitemanager][status] = 1
+
+; General Site Configuration
+; --------------------------
+
+variables[site_name] = Catapipper
+variables[site_slogan] = Crawler of Parks
+variables[site_mail] = catapipper@gmail.com
+variables[date_default_timezone] = America/New_York
+variables[site_default_country] = US
+
+variables[site_frontpage] = node/1
+variables[error_level] = 0
+variables[configurable_timezones] = 0
+variables[user_register] = 0
+;variables[theme_default] = catapipper
+variables[admin_theme] = ember
