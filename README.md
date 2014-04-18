@@ -1,19 +1,15 @@
 # Catapipper: Care & Upkeep
 
-* Clone Catapipper from the SUAR IT git repo.  
-	<code>git clone git@suaritgit:/home/git/repositories/catapipper.git</code>  
+* Clone Catapipper from the github repo.  
+	<code>git clone https://github.com/aerynj/catapipper_distribution.git 
 	(Optional branch designation)  
-	<code>git clone -b development git@suaritgit:/home/git/repositories/catapipper.git</code>
+	<code>git clone -b develop https://github.com/aerynj/catapipper_distribution.git
 
 ## Catapipper: Installation Guide
 * Install Catapipper from the stub file
 	<code>drush make --no-cache catapipper-stub.make catapipper.site</code>
 
 ## Catapipper: Post-Install Instructions
-
-### Login Instructions
-* Check email at [suarit-dept@uncc.edu](mailto:suarit-dept@uncc.edu) for a one time login email
-* Click the link in the email and set the main account (suaritadmin) password to the standard drupal admin password
 
 ### Google Analytics Setup
 Google analytics cannot be installed dynamically because each tracking code is different, so it must be setup manually.

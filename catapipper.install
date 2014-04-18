@@ -438,28 +438,7 @@ function catapipper_install() {
           'suffix' => NULL,
           )
         )
-      ),
-    3 => array(
-      'name' => 'SUAR',
-      'usertab' => 1,
-      'filesize' => 1,
-      'quota' => 0,
-      'tuquota' => 0,
-      'extensions' => 'gif png jpg jpeg',
-      'dimensions' => '1270x600',
-      'filenum' => 1,
-      'directories' => array(
-        0 => array(
-          'name' => 'images',
-          'subnav' => 0,
-          'browse' => 1,
-          'upload' => 1,
-          'thumb' => 1,
-          'delete' => 1,
-          'resize' => 1,
-          )
-        )
-      ) 
+      )
     );
     
     variable_set('imce_profiles', $imce_profiles);

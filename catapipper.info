@@ -33,7 +33,6 @@ dependencies[] = shortcut
 dependencies[] = system
 dependencies[] = taxonomy
 dependencies[] = text
-;dependencies[] = toolbar
 dependencies[] = update
 dependencies[] = user
 
@@ -43,7 +42,6 @@ dependencies[] = user
 dependencies[] = autologout
 dependencies[] = advanced_help
 dependencies[] = better_formats
-;dependencies[] = breakpoints
 dependencies[] = ckeditor
 dependencies[] = conditional_fields
 dependencies[] = ctools
@@ -72,7 +70,6 @@ dependencies[] = menu_block
 dependencies[] = module_filter
 dependencies[] = navbar
 dependencies[] = pathauto
-;dependencies[] = picture
 dependencies[] = rules
 dependencies[] = rules_admin
 dependencies[] = scheduler
@@ -120,27 +117,11 @@ dependencies[] = date_repeat
 dependencies[] = date_repeat_field
 dependencies[] = date_views
 
-; Create Users
-; ------------
-
-users[admin][uid] = 1
-users[admin][name] = catapipper
-users[admin][mail] = catapipper@gmail.com
-users[admin][roles] = authenticated user
-users[admin][status] = 1
-
-users[sitemanager][uid] = 2
-users[sitemanager][name] = sitemanager
-users[sitemanager][mail] = do.no.reply@uncc.edu
-users[sitemanager][roles] = site manager
-users[sitemanager][status] = 1
-
 ; General Site Configuration
 ; --------------------------
 
 variables[site_name] = Catapipper
 variables[site_slogan] = Crawler of Parks
-variables[site_mail] = catapipper@gmail.com
 variables[date_default_timezone] = America/New_York
 variables[site_default_country] = US
 
